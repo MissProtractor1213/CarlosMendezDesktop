@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fake Log Viewer — Suspicious Entries</title>
+<style>
+  :root{
+    --bg:#071022; --panel:#071021; --muted:#9aa7bf;
+    --info:#7dd3fc; --warn:#f59e0b; --error:#fb7185; --debug:#a3e635;
+    --white:#e6eef8;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#031022 0%, #071833 60%);color:var(--white)}
+  .app{max-width:1100px;margin:28px auto;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:8px;box-shadow:0 6px 28px rgba(2,6,23,0.6)}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  h1{font-size:1.05rem;margin:0;color:var(--white);font-weight:600}
+  .controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+  select,input[type="search"]{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:6px 8px;border-radius:6px;font-size:0.95rem}
+  button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:8px 10px;border-radius:6px;cursor:pointer}
+  .viewer{height:560px;overflow:auto;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.03)}
+  .line{display:flex;gap:12px;padding:4px 6px;white-space:pre;align-items:baseline;font-size:0.92rem;border-left:3px solid transparent}
+  .ln{width:46px;color:var(--muted);flex:0 0 46px;text-align:right;padding-right:6px}
+  .ts{color:#9fb3d6;flex:0 0 220px}
+  .host{color:#7ea1c8;flex:0 0 160px}
+  .lvl{width:70px;text-transform:uppercase;font-weight:700;letter-spacing:0.6px}
+  .msg{color:var(--white);overflow:visible}
+  .info .lvl{color:var(--info)}
+  .warn .lvl{color:var(--warn)}
+  .error .lvl{color:var(--error)}
+  .debug .lvl{color:var(--debug)}
+  .suspicious{border-left-color:rgba(251,113,133,0.9);background:linear-gradient(90deg, rgba(251,113,133,0.03), transparent)}
+  .meta{color:var(--muted);font-size:0.85rem;margin-left:8px}
+  .highlight{background:rgba(255,255,255,0.02);border-radius:4px;padding:0 4px}
+  .small{font-size:0.82rem;color:var(--muted)}
+  footer{margin-top:12px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:0.85rem}
+  @media (max-width:640px){ .ts{flex-basis:140px} .host{display:none} .ln{display:none} }
+</style>
+</head>
+<body>
+<div class="app" role="main" aria-label="Fake log viewer with suspicious entries">
+  <header>
+    <h1>northbridge-svc — application.log (SIMULATED)</h1>
+    <div class="controls">
+      <label class="small" for="level">Level</label>
+      <select id="level" title="Filter by level">
+        <option value="ALL">All</option>
+        <option value="ERROR">ERROR</option>
+        <option value="WARN">WARN</option>
+        <option value="INFO">INFO</option>
+        <option value="DEBUG">DEBUG</option>
+      </select>
+      <input type="search" id="search" placeholder="Search message / pid / user..." aria-label="search logs" />
+      <button id="download">Download .log</button>
+      <button id="copy">Copy</button>
+    </div>
+  </header>
+
+  <div id="viewer" class="viewer" tabindex="0" aria-live="polite" aria-atomic="false"></div>
+
+  <footer>
+    <div class="small">Rendered: <span id="count">0</span> lines • Fake log for training & tabletop exercises</div>
+    <div class="small">Host: <span class="highlight">northbridge-prod-a</span> • PID range: 1000-4500</div>
+  </footer>
+</div>
+
+<script>
+/* ---------------------
+   Editable fake log lines
+   - suspicious entries intentionally included:
+     * logins at 02:xx (off-hours)
+     * huge downloads/exports (GB)
+     * auth failures from unusual IPs
+     * account lock / token revocation
+----------------------*/
+const LOGS = [
+  "2025-09-27T01:58:34.112Z northbridge-prod-a app[1010] INFO  User 'mreed' authenticated successfully (src=10.12.4.15)",
+  "2025-09-27T02:01:05.221Z northbridge-prod-a sshd[1503] INFO  Accepted password for 'svc_backup' from 172.56.9.205 port 49212 ssh2",
+  "2025-09-27T02:01:08.004Z northbridge-prod-a app[1011] DEBUG  Session token generated: st_7a9f1c3b",
+  "2025-09-27T02:02:12.012Z northbridge-prod-a api[1101] INFO  GET /api/v1/exports/data?job=exp_992 returned 200 (size=49.8GB, files=1, duration=00:04:12) -- user='svc_backup' (src=172.56.9.205)",
+  "2025-09-27T02:02:12.013Z northbridge-prod-a storage[3301] WARN  Large outbound transfer detected: /exports/exp_992.tar.gz -> external 34.203.12.11 (size=49.8GB)",
+  "2025-09-27T02:03:01.450Z northbridge-prod-c db[4201] ERROR Unable to acquire connection from pool (timeout=3000ms) - poolSize=12",
+  "2025-09-27T02:03:05.214Z northbridge-prod-a app[1012] INFO  File uploaded: reports/monthly-summary.pdf (user=hr_analyst)",
+  "2025-09-27T02:04:10.555Z northbridge-prod-a app[1013] WARN  High memory usage detected: 92% (pid=1013) - possible leak",
+  "2025-09-27T02:04:11.777Z northbridge-prod-b worker[2201] DEBUG  Processing queue 'emails' jobId=job_33a2",
+  "2025-09-27T02:05:12.901Z northbridge-prod-a auth[2103] INFO  Token revoked for user 'contractor_09' (reason=manual_review)",
+  "2025-09-27T02:05:14.333Z northbridge-prod-a app[1010] INFO  Request completed: POST /api/v1/login (ms=58)",
+  "2025-09-27T02:06:16.999Z northbridge-prod-a app[1020] ERROR  Unhandled exception in payment processor: TimeoutError: Request timed out after 60000ms",
+  "2025-09-27T02:07:18.101Z northbridge-prod-a app[1021] WARN  Deprecated API v1 used by client 10.5.3",
+  "2025-09-27T02:08:19.222Z northbridge-prod-b worker[2202] INFO  Email sent to 'alerts@northbridge.local' (emailId=em_99ef)",
+  "2025-09-27T02:09:20.333Z northbridge-prod-c monitor[5001] DEBUG  Ping check to 8.8.8.8 succeeded (latency=21ms)",
+  "2025-09-27T02:10:21.444Z northbridge-prod-a app[1010] INFO  Cache miss for key 'user_profile_322' (ttl=3600)",
+  "2025-09-27T02:11:22.555Z northbridge-prod-b db[4201] WARN  Slow query detected (ms=1203) — consider adding index on assets.status",
+  "2025-09-27T02:12:24.777Z northbridge-prod-a auth[2103] ERROR  Multiple failed logins detected for user 'sbrown' (ip=203.0.113.19) - locking account",
+  "2025-09-27T02:12:26.999Z northbridge-prod-a app[1034] DEBUG  Metric 'request_latency' value=152.4",
+  "2025-09-27T02:13:30.111Z northbridge-prod-a proxy[4010] INFO  Outbound connection to unusual host 34.203.12.11 established by process app[1101]",
+  "2025-09-27T02:14:45.999Z northbridge-prod-a storage[3301] INFO  Archive 'exp_992.tar.gz' checksum computed (sha256=7f3b...9c2a) - queued for external transfer",
+  "2025-09-27T03:15:00.000Z northbridge-prod-a app[1200] INFO  Scheduled maintenance window started (expected 00:30)",
+  "2025-09-27T04:02:12.313Z northbridge-prod-b auth[2104] WARN  Multiple login attempts from 45.76.88.101 (attempts=6) - suspicious",
+  "2025-09-27T04:02:30.412Z northbridge-prod-b sshd[1509] INFO  Failed password for 'admin' from 45.76.88.101 port 59912 ssh2",
+  "2025-09-27T04:05:12.512Z northbridge-prod-b auth[2104] ERROR  Account 'admin' disabled after 7 failed attempts",
+  "2025-09-27T04:06:00.612Z northbridge-prod-b app[1300] INFO  Audit log pruning requested by 'svc_backup' (pid=1503) -- range=2025-01-01..2025-09-27",
+  "2025-09-27T04:06:05.712Z northbridge-prod-b app[1300] WARN  Audit log pruning completed. entries_removed=432 -- initiated_by=svc_backup",
+  "2025-09-27T04:07:15.812Z northbridge-prod-b api[1400] INFO  GET /api/v1/exports/data?job=exp_993 returned 200 (size=0.2GB, files=12, ms=180)",
+  "2025-09-27T04:08:25.912Z northbridge-prod-a app[1101] DEBUG  Heartbeat OK (uptime=12d)",
+  "2025-09-27T04:09:35.012Z northbridge-prod-a app[1101] INFO  User 'sec_team' triggered incident_alert id=inc_770",
+  "2025-09-27T04:10:45.112Z northbridge-prod-a notifier[9001] INFO  PagerDuty incident created: PDINC12345 (sev=high)"
+];
+
+/* ---------------------
+   Render & interactivity
+----------------------*/
+const viewer = document.getElementById('viewer');
+const countEl = document.getElementById('count');
+const levelSel = document.getElementById('level');
+const searchEl = document.getElementById('search');
+const downloadBtn = document.getElementById('download');
+const copyBtn = document.getElementById('copy');
+
+function classifyLine(text) {
+  const lower = text.toLowerCase();
+  if (/(unable to|error|failed|locking|disabled|revoked|timeout|pruning|removed)/.test(lower)) return 'error';
+  if (/(warn|slow|deprecated|high memory|suspicious|large outbound|archive)/.test(lower)) return 'warn';
+  if (/(debug|metric|heartbeat|queued|processing)/.test(lower)) return 'debug';
+  return 'info';
+}
+
+function isSuspicious(text) {
+  // simple heuristics for highlighting suspicious activity
+  return /(02:0[0-9]|02:1[0-9]|large outbound transfer|49.8gb|unusual host|audit log pruning|multiple failed logins|failed password from|account 'admin' disabled)/i.test(text);
+}
+
+function renderLogs() {
+  const lvl = levelSel.value;
+  const q = searchEl.value.trim().toLowerCase();
+  viewer.innerHTML = '';
+  let rendered = 0;
+  LOGS.forEach((line, idx) => {
+    const cls = classifyLine(line);
+    if (lvl !== 'ALL' && cls.toUpperCase() !== lvl) return;
+    if (q && line.toLowerCase().indexOf(q) === -1) return;
+    const el = document.createElement('div');
+    el.className = `line ${cls}` + (isSuspicious(line) ? ' suspicious' : '');
+    const ln = document.createElement('div'); ln.className = 'ln'; ln.textContent = String(idx+1).padStart(4);
+    const ts = document.createElement('div'); ts.className = 'ts'; ts.textContent = line.slice(0,24);
+    const host = document.createElement('div'); host.className = 'host'; host.textContent = (line.split(' ')[1]||'').trim();
+    const lvlDiv = document.createElement('div'); lvlDiv.className = 'lvl'; lvlDiv.textContent = cls.toUpperCase();
+    const msg = document.createElement('div'); msg.className = 'msg'; msg.textContent = line.slice(25);
+    el.appendChild(ln); el.appendChild(ts); el.appendChild(host); el.appendChild(lvlDiv); el.appendChild(msg);
+    viewer.appendChild(el);
+    rendered++;
+  });
+  countEl.textContent = rendered;
+}
+
+levelSel.addEventListener('change', renderLogs);
+searchEl.addEventListener('input', () => { renderLogs(); });
+
+downloadBtn.addEventListener('click', () => {
+  const lvl = levelSel.value;
+  const q = searchEl.value.trim().toLowerCase();
+  const out = LOGS.filter(line => {
+    const cls = classifyLine(line);
+    if (lvl !== 'ALL' && cls.toUpperCase() !== lvl) return false;
+    if (q && line.toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  }).join('\n');
+  const blob = new Blob([out], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'application_simulated.log'; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 3000);
+});
+
+copyBtn.addEventListener('click', async () => {
+  const lvl = levelSel.value;
+  const q = searchEl.value.trim().toLowerCase();
+  const out = LOGS.filter(line => {
+    const cls = classifyLine(line);
+    if (lvl !== 'ALL' && cls.toUpperCase() !== lvl) return false;
+    if (q && line.toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  }).join('\n');
+  try {
+    await navigator.clipboard.writeText(out);
+    copyBtn.textContent = 'Copied!';
+    setTimeout(()=>copyBtn.textContent='Copy',1200);
+  } catch(e){
+    copyBtn.textContent = 'Fail';
+    setTimeout(()=>copyBtn.textContent='Copy',1200);
+  }
+});
+
+renderLogs();
+</script>
+</body>
+</html>
