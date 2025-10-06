@@ -29,7 +29,8 @@ import useFullscreen from "../hooks/useFullscreen";
  * public/sim/files/company-policy.pdf
  */
 
-const WALLPAPER = "bg-gradient-to-r from-cyan-500 to-indigo-800";
+const WALLPAPER = "bg-gradient-to-r from-[#ff9a3c] via-[#ffc86b] to-[#fff5a0]";
+
 
 /* Simple Windows logo */
 function WindowsLogo({ className = "w-7 h-7" }) {
@@ -106,18 +107,18 @@ function FileExplorer() {
   const files = useMemo(
     () => [
       {
-        name: "company-policy.pdf",
+        name: "anydeskclient.msi",
         type: "pdf",
         size: "220 KB",
         modified: "Yesterday 4:02 PM",
-        path: `${process.env.PUBLIC_URL}/sim/files/company-policy.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/anydesk.html`,
       },
       {
-        name: "TEAM-PHOTO.pdf",
+        name: "eventlog.txt",
         type: "html",
         size: "1.2 MB",
         modified: "Today 3:10 PM",
-        path: `${process.env.PUBLIC_URL}/sim/files/wafer-recipe.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/eventlog.html`,
       },
       {
         name: "bench_backup",
@@ -450,7 +451,7 @@ export default function EscapeRoomDesktop() {
                   e.currentTarget.style.display = "none";
                 }}
               />
-              <div className="text-3xl font-bold text-gray-800 mt-2">Marcus Reed</div>
+              <div className="text-3xl font-bold text-gray-800 mt-2">Carlos Mendez</div>
               <div className="text-base text-gray-600">Sign in</div>
             </div>
 
