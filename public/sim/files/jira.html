@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Email — JIRA Ticket Notification</title>
+  <style>
+    body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color: #202124; margin: 0; padding: 24px; background:#f5f7fb; }
+    .card { background: #ffffff; border: 1px solid #e6e9ee; border-radius: 8px; max-width: 700px; margin: 0 auto; padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.06); }
+    .header { display:flex; gap:12px; align-items:center; }
+    .avatar { width:48px; height:48px; border-radius:8px; background:#dfe7ff; display:flex; align-items:center; justify-content:center; color:#21307a; font-weight:700; }
+    .meta { font-size:14px; color:#6b7280; }
+    h1 { margin:12px 0 6px; font-size:16px; color:#111827; }
+    .ticket { background:#f0f8ff; border:1px dashed #cfe6ff; padding:12px; border-radius:6px; font-family: monospace; display:inline-block; }
+    .section { margin-top:14px; }
+    .btn { display:inline-block; margin-top:12px; padding:8px 12px; border-radius:6px; background:#0b63ff; color:#fff; text-decoration:none; font-weight:600; }
+    .small { font-size:13px; color:#374151; }
+    .footer { margin-top:18px; font-size:12px; color:#6b7280; border-top:1px solid #f1f5f9; padding-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="card" role="article" aria-label="Email about JIRA ticket">
+    <div class="header">
+      <div class="avatar">AM</div>
+      <div>
+        <div style="font-weight:600;color:#0f1724;">Alex Martin</div>
+        <div class="meta">Product Engineering • Acme Internal Tools &nbsp;•&nbsp; alex.martin@acme-corp.local</div>
+      </div>
+    </div>
+
+    <h1>New high-priority JIRA ticket created: <span class="ticket">PROJ-4521</span></h1>
+
+    <div class="small">
+      <strong>To:</strong> eng-frontend@acme-corp.local; qa-team@acme-corp.local<br/>
+      <strong>Date:</strong> October 6, 2025
+    </div>
+
+    <div class="section">
+      <p>Hi team,</p>
+
+      <p>I've created a JIRA ticket for a regression impacting login session handling on the staging environment. This issue is causing users to be unexpectedly logged out after ~5 minutes of inactivity (previously 30 minutes).</p>
+
+      <div style="margin-top:8px;">
+        <strong>Ticket summary</strong>
+        <ul>
+          <li><strong>ID:</strong> <span class="ticket">PROJ-4521</span></li>
+          <li><strong>Priority:</strong> Blocker</li>
+          <li><strong>Assignee:</strong> @rachel.chen</li>
+          <li><strong>Reporter:</strong> Alex Martin</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:8px;">
+        <strong>Description</strong>
+        <p class="small">Sessions expire prematurely on staging after a recent auth cookie change (deploy 2025-10-05 02:14 UTC). Affected flows include SSO and direct login. Steps to reproduce and logs are attached.</p>
+      </div>
+
+      <div style="margin-top:8px;">
+        <strong>Steps to reproduce</strong>
+        <ol>
+          <li>Log in to staging.acme-corp.local using a valid user (SSO or local).</li>
+          <li>Leave the browser idle for ~5 minutes (no activity).</li>
+          <li>Attempt to navigate — the user is redirected to the login page and sees a 401 toast.</li>
+        </ol>
+      </div>
+
+      <div style="margin-top:8px;">
+        <strong>Observed</strong>
+        <p class="small">Immediate redirect to login and "Session expired" toast. Session cookie `acme_sess` shows `Max-Age` reduced to 300s in response headers.</p>
+
+        <strong>Expected</strong>
+        <p class="small">Sessions remain active for 30 minutes of inactivity; refresh token flow should silently renew session.</p>
+      </div>
+
+      <div style="margin-top:8px;">
+        <strong>Attachments / useful links</strong>
+        <ul>
+          <li>staging-login-2025-10-06-14:23.log (attached)</li>
+          <li><a href="https://jira.acme-corp.local/browse/PROJ-4521" target="_blank" rel="noopener">Open PROJ-4521 in JIRA</a></li>
+        </ul>
+      </div>
+
+      <a class="btn" href="https://jira.acme-corp.local/browse/PROJ-4521" target="_blank" rel="noopener">View Ticket</a>
+
+      <p style="margin-top:12px;">Please triage and, if confirmed, escalate to the SSO and Auth teams. Tentatively marking as <em>Blocker</em> due to customer-facing impact in staging (blocking next test run).</p>
+
+      <p>Thanks —<br/>
+      Alex</p>
+    </div>
+
+    <div class="footer">
+      Alex Martin — Product Engineering<br/>
+      Acme Internal Tools • Slack: @alex.martin • Phone: (555) 555-0123
+    </div>
+  </div>
+</body>
+</html>
