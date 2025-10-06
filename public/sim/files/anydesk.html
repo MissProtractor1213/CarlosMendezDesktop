@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fake MSI — AnyDesk (Prop)</title>
+<style>
+  :root{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; color:#111;}
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#f6f8fb,#ffffff);margin:0;padding:32px;}
+  .card{width:720px;border-radius:12px;box-shadow:0 8px 30px rgba(13,38,76,0.07);background:#fff;padding:20px;}
+  .row{display:flex;gap:16px;align-items:center;}
+  .icon{
+    width:84px;height:84px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#0b84ff,#0b6bff);color:#fff;font-weight:700;font-size:18px;box-shadow:0 6px 18px rgba(11,104,255,0.15);
+  }
+  .meta{flex:1;}
+  .filename{font-size:20px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .tag{font-size:12px;padding:4px 8px;border-radius:999px;background:#f1f6ff;color:#0b66ff;border:1px solid #e5f0ff;}
+  .sub{color:#556; font-size:13px;margin-bottom:8px;}
+  .props{display:flex;gap:12px;flex-wrap:wrap;}
+  .prop{background:#fafafa;border:1px solid #f0f0f0;padding:10px;border-radius:8px;font-size:13px;color:#333;min-width:180px}
+  .actions{display:flex;gap:10px;margin-top:16px;}
+  button{padding:10px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+  .btn-primary{background:#0b66ff;color:white;box-shadow:0 6px 18px rgba(11,102,255,0.18)}
+  .btn-ghost{background:transparent;border:1px solid #e6e9ef;color:#203152}
+  .note{margin-top:14px;color:#6b7280;font-size:13px}
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:none;align-items:center;justify-content:center;padding:28px}
+  .modal{background:white;padding:18px;border-radius:10px;max-width:720px;width:100%;box-shadow:0 20px 60px rgba(13,38,76,0.2);}
+  pre{background:#0f1724;color:#dbeafe;padding:12px;border-radius:8px;overflow:auto;font-size:13px}
+  .fake-badge{font-size:11px;color:#7b2cbf;background:#f8f4ff;padding:4px 8px;border-radius:6px;border:1px solid #f0eaff}
+</style>
+</head>
+<body>
+  <div class="card" role="main" aria-label="Fake AnyDesk MSI file card">
+    <div class="row">
+      <div class="icon" aria-hidden="true">MSI</div>
+      <div class="meta">
+        <div class="filename">
+          <span>AnyDesk_Setup_FAKE.msi</span>
+          <span class="tag">FAKE — FOR PROP / TRAINING</span>
+        </div>
+        <div class="sub">Windows Installer Package (.msi) — last modified: <strong>Oct 5, 2025</strong></div>
+
+        <div class="props" aria-hidden="true">
+          <div class="prop"><strong>Size</strong><div>4.8 MB</div></div>
+          <div class="prop"><strong>Publisher</strong><div>AnyDesk Software GmbH (simulated)</div></div>
+          <div class="prop"><strong>Version</strong><div>7.2.0 (simulated)</div></div>
+          <div class="prop"><strong>SHA256</strong><div style="font-family:monospace;font-size:12px">FAKE-SHA256-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="downloadBtn" title="Download fake .msi">Download (fake .msi)</button>
+          <button class="btn-ghost" id="propsBtn">View Properties</button>
+        </div>
+
+        <div class="note">
+          This is a <strong>fake</strong> .msi file made for simulation/props only. The downloaded file is a harmless text blob named <code>AnyDesk_Setup_FAKE.msi</code>.
+        </div>
+      </div>
+    </div>
+
+    <hr style="margin:18px 0;border:0;border-top:1px solid #f0f2f6">
+
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="flex:1">
+        <h3 style="margin:4px 0 8px 0">Notes for facilitators</h3>
+        <ul style="margin:0 0 8px 18px;color:#444;font-size:14px">
+          <li>Use this page as part of a mock downloads folder, training kiosk, or escape-room clue.</li>
+          <li>The file is intentionally labeled <em>FAKE</em> and the download contains a short note inside to avoid accidental misuse.</li>
+        </ul>
+        <button class="btn-ghost" id="copyBtn">Copy file details to clipboard</button>
+      </div>
+      <div style="width:240px">
+        <div style="background:#fff9f0;border:1px solid #fff0d6;padding:12px;border-radius:8px;font-size:13px">
+          <div style="font-weight:700;margin-bottom:6px">Simulated Risk</div>
+          <div style="color:#5b4b00">High — treat as suspicious in real environments. This is for training only.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-bg" id="modalBg" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <h2 style="margin-top:0">Properties — AnyDesk_Setup_FAKE.msi <span style="float:right" class="fake-badge">PROP</span></h2>
+      <p style="color:#374151;margin-top:6px">These properties are simulated for exercise/prop use.</p>
+      <pre id="propText">
+File name: AnyDesk_Setup_FAKE.msi
+Type: Windows Installer Package (.msi)
+Size: 4.8 MB (simulated)
+Version: 7.2.0 (simulated)
+Publisher: AnyDesk Software GmbH (simulated)
+Created: Oct 5, 2025 10:22 PM
+Modified: Oct 5, 2025 10:22 PM
+SHA256: FAKE-SHA256-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Notes: This is a fake installer file created for training/escape-room use only.
+      </pre>
+      <div style="text-align:right;margin-top:12px">
+        <button id="closeModal" class="btn-ghost">Close</button>
+        <button id="downloadModal" class="btn-primary">Download (fake .msi)</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // create a harmless "fake MSI" and trigger download
+  function makeFakeMsiBlob() {
+    const content = [
+      "This is a FAKE MSI file created for simulation / training / prop use only.",
+      "Filename: AnyDesk_Setup_FAKE.msi",
+      "Created: " + new Date().toLocaleString(),
+      "",
+      "DO NOT INSTALL. This is not an installer and contains no executable code.",
+      "Use only for mock displays or training exercises."
+    ].join("\\n");
+    return new Blob([content], { type: "text/plain" });
+  }
+
+  function triggerDownload(filename) {
+    const blob = makeFakeMsiBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    triggerDownload('AnyDesk_Setup_FAKE.msi');
+  });
+
+  document.getElementById('propsBtn').addEventListener('click', () => {
+    const modalBg = document.getElementById('modalBg');
+    modalBg.style.display = 'flex';
+    modalBg.setAttribute('aria-hidden','false');
+  });
+
+  document.getElementById('closeModal').addEventListener('click', () => {
+    const modalBg = document.getElementById('modalBg');
+    modalBg.style.display = 'none';
+    modalBg.setAttribute('aria-hidden','true');
+  });
+
+  document.getElementById('downloadModal').addEventListener('click', () => {
+    triggerDownload('AnyDesk_Setup_FAKE.msi');
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const text = [
+      'AnyDesk_Setup_FAKE.msi',
+      'Size: 4.8 MB (simulated)',
+      'Version: 7.2.0 (simulated)',
+      'Publisher: AnyDesk Software GmbH (simulated)',
+      'SHA256: FAKE-SHA256-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    ].join('\\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('File details copied to clipboard (simulated).');
+    } catch (e) {
+      alert('Could not copy — your browser may block clipboard access.');
+    }
+  });
+
+  // Accessibility: close modal on ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modalBg = document.getElementById('modalBg');
+      if (modalBg.style.display === 'flex') {
+        modalBg.style.display = 'none';
+        modalBg.setAttribute('aria-hidden','true');
+      }
+    }
+  });
+</script>
+</body>
+</html>
