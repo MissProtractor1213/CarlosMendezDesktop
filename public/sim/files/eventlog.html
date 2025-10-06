@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Event Log Export — Persistent 4-digit Code</title>
+<style>
+  :root{--bg:#f6f8fb;--card:#ffffff;--muted:#6b7280;--accent:#0b66ff;}
+  body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:var(--bg); color:#0f1724; padding:28px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .title{display:flex;gap:12px;align-items:center}
+  .logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#0b84ff);border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  h1{font-size:18px;margin:0}
+  .meta{color:var(--muted);font-size:13px}
+  .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 8px 30px rgba(10,20,40,0.06)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  button{padding:10px 12px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(11,102,255,0.12)}
+  .btn-ghost{background:transparent;border:1px solid #e6ecff;color:var(--accent)}
+  .small{font-size:13px;padding:8px 10px}
+  .code-box{margin-top:12px;padding:12px;border-radius:8px;background:#fff7f8;border:1px solid #ffd7dc;display:flex;align-items:center;gap:12px}
+  .code{font-family:monospace;font-size:20px;color:#b91c1c;font-weight:800;background:rgba(185,28,28,0.05);padding:6px 10px;border-radius:6px}
+  .log-preview{margin-top:14px;border-radius:8px;overflow:auto;border:1px solid #eef2f7}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:8px;border-bottom:1px solid #f3f6fb;text-align:left}
+  th{background:#fbfdff;position:sticky;top:0}
+  .muted{color:var(--muted);font-size:13px}
+  .note{margin-top:10px;color:var(--muted);font-size:13px}
+  .right{display:flex;gap:8px;align-items:center}
+  .reset{background:#fff;border:1px solid #f0f0f0;color:#b91c1c}
+  .download{background:#0b7a3a;color:#fff}
+  .actions-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}
+  .reset-confirm{font-size:13px;color:#b91c1c}
+  @media (max-width:720px){.header{flex-direction:column;align-items:flex-start}.actions-row{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">
+        <div class="logo" aria-hidden="true">EL</div>
+        <div>
+          <h1>Event Log Export — Mock / Prop</h1>
+          <div class="meta">Includes a persistent randomized 4-digit code (red) for training or tagging</div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="muted">Export type:</div>
+        <select id="formatSelect" class="small">
+          <option value="log">.log (text)</option>
+          <option value="csv">.csv</option>
+        </select>
+        <button id="downloadBtn" class="btn-primary small">Download Export</button>
+      </div>
+    </div>
+
+    <div class="card" role="main" aria-label="Event log export card">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <div>
+          <div class="muted">Persistent 4-digit event code (stored in browser)</div>
+          <div class="code-box" id="codeBox">
+            <div class="code" id="persistCode">0000</div>
+            <div>
+              <div style="font-weight:700">Event Tag</div>
+              <div class="muted">Use this code in printed props, filenames, and exported logs.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:right">
+          <div class="muted">File name preview</div>
+          <div style="font-family:monospace;margin-top:6px" id="filenamePreview">event_log_0000.log</div>
+          <div class="controls" style="justify-content:flex-end">
+            <button id="copyDetails" class="btn-ghost small">Copy header</button>
+            <button id="resetBtn" class="reset small">Reset code</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <div style="flex:1">
+          <div style="margin-top:12px">
+            <label class="muted">Search / filter (regex supported):</label>
+            <input id="filterInput" placeholder="e.g., ERROR|Code:1234" style="width:60%;padding:8px;border-radius:8px;border:1px solid #eef2f7;margin-left:8px">
+            <button id="applyFilter" class="btn-ghost small">Apply</button>
+            <button id="clearFilter" class="btn-ghost small">Clear</button>
+          </div>
+        </div>
+
+        <div style="min-width:240px;text-align:right">
+          <div class="muted">Entries: <span id="entryCount">0</span></div>
+        </div>
+      </div>
+
+      <div class="log-preview" id="logPreview" style="margin-top:12px;max-height:360px">
+        <!-- table inserted by JS -->
+      </div>
+
+      <div class="note">This mock export is safe and non-executable. Use for training, props, or documentation. The 4-digit code is stored locally and will persist until you reset it.</div>
+    </div>
+  </div>
+
+<script>
+  // Utilities
+  function rand4() {
+    return Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+  }
+
+  // Persistent code key
+  const STORAGE_KEY = "mock_event_log_code_v1";
+
+  // Get or create persistent code
+  function getPersistentCode() {
+    let c = localStorage.getItem(STORAGE_KEY);
+    if (!c) {
+      c = rand4();
+      localStorage.setItem(STORAGE_KEY, c);
+    }
+    return c;
+  }
+
+  // Reset code (with confirmation)
+  function resetCode() {
+    if (!confirm("Generate a new 4-digit code? This will replace the persisted code in this browser.")) return;
+    const newc = rand4();
+    localStorage.setItem(STORAGE_KEY, newc);
+    applyCode(newc);
+  }
+
+  // Apply code to UI
+  function applyCode(code) {
+    document.getElementById("persistCode").textContent = code;
+    document.getElementById("filenamePreview").textContent = `event_log_${code}.${document.getElementById("formatSelect").value === "csv" ? "csv" : "log"}`;
+    // also update table rows (they include the code in a column)
+    renderTable(currentEntries);
+  }
+
+  // Sample event log generator (with the code embedded in each record)
+  function generateSampleEntries(code, count = 60) {
+    const levels = ["INFO","WARN","ERROR","AUDIT","DEBUG"];
+    const components = ["Auth","Kernel","WindowsUpdate","AppX","Network","Storage","ProcessMonitor"];
+    const now = Date.now();
+    const entries = [];
+    for (let i = 0; i < count; i++) {
+      const t = new Date(now - (count-i)*60000).toISOString(); // minute increments
+      const level = levels[Math.floor(Math.random()*levels.length)];
+      const comp = components[Math.floor(Math.random()*components.length)];
+      const id = 1000 + Math.floor(Math.random()*9000);
+      const message = (level==="ERROR") ? `Failed to complete task ${Math.random().toString(36).slice(2,8)}` : `Operation completed`;
+      // embed code in a field
+      entries.push({
+        timestamp: t,
+        level: level,
+        component: comp,
+        eventid: id,
+        code: code,
+        message: `${message} (Tag:${code})`
+      });
+    }
+    return entries;
+  }
+
+  // Globals
+  let currentEntries = [];
+
+  // Render table of entries
+  function renderTable(entries, filterRegex=null) {
+    const container = document.getElementById("logPreview");
+    const code = localStorage.getItem(STORAGE_KEY) || getPersistentCode();
+    const rowsHtml = [];
+
+    // header
+    rowsHtml.push(`<table><thead><tr><th>Timestamp</th><th>Level</th><th>Component</th><th>Event ID</th><th>Tag</th><th>Message</th></tr></thead><tbody>`);
+
+    let shown = 0;
+    for (const e of entries) {
+      const line = `${e.timestamp} ${e.level} ${e.component} ${e.eventid} ${e.code} ${e.message}`;
+      if (filterRegex) {
+        try {
+          if (!filterRegex.test(line)) continue;
+        } catch (err) {
+          // invalid regex -> ignore filter
+        }
+      }
+      rowsHtml.push(`<tr>
+        <td>${e.timestamp}</td>
+        <td>${e.level}</td>
+        <td>${e.component}</td>
+        <td>${e.eventid}</td>
+        <td style="font-family:monospace;color:#b91c1c;font-weight:800">${e.code}</td>
+        <td>${escapeHtml(e.message)}</td>
+      </tr>`);
+      shown++;
+    }
+
+    rowsHtml.push(`</tbody></table>`);
+    container.innerHTML = rowsHtml.join("");
+    document.getElementById("entryCount").textContent = shown;
+  }
+
+  // Escape HTML helper
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+  }
+
+  // Create export content (either .log text or .csv)
+  function makeExport(entries, format) {
+    const code = localStorage.getItem(STORAGE_KEY) || getPersistentCode();
+    const headerNote = [
+      `# Mock Event Log Export`,
+      `# Generated: ${new Date().toLocaleString()}`,
+      `# PersistentTag: ${code}`,
+      `# Note: This is a simulated export for training/prop use only.`
+    ].join("\n");
+
+    if (format === "log") {
+      const lines = entries.map(e => `${e.timestamp} [${e.level}] (${e.component}) EventID=${e.eventid} Tag=${e.code} - ${e.message}`);
+      return [headerNote,"",...lines].join("\n");
+    } else { // csv
+      const csvRows = [["timestamp","level","component","eventid","tag","message"]];
+      for (const e of entries) {
+        csvRows.push([e.timestamp,e.level,e.component,e.eventid,e.code,`"${e.message.replace(/"/g,'""')}"`]);
+      }
+      return [headerNote,"", csvRows.map(r => r.join(",")).join("\n")].join("\n");
+    }
+  }
+
+  // Download blob as file
+  function downloadBlob(filename, content, mime="text/plain") {
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // Copy header/details to clipboard
+  async function copyHeaderToClipboard() {
+    const code = localStorage.getItem(STORAGE_KEY) || getPersistentCode();
+    const header = `Mock Event Log Export\nGenerated: ${new Date().toLocaleString()}\nPersistentTag: ${code}\nUse this code in props or filenames.`;
+    try{
+      await navigator.clipboard.writeText(header);
+      alert("Header details copied to clipboard.");
+    }catch(e){
+      prompt("Copy the header below manually:", header);
+    }
+  }
+
+  // Initialize
+  (function init(){
+    const code = getPersistentCode();
+    applyCode(code);
+    // generate sample entries (they include the code)
+    currentEntries = generateSampleEntries(code, 80);
+    renderTable(currentEntries);
+
+    // wire buttons
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const fmt = document.getElementById("formatSelect").value;
+      const code = localStorage.getItem(STORAGE_KEY) || getPersistentCode();
+      const filename = `event_log_${code}.${fmt==="csv"?"csv":"log"}`;
+      const content = makeExport(currentEntries, fmt);
+      const mime = fmt==="csv" ? "text/csv" : "text/plain";
+      downloadBlob(filename, content, mime);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", resetCode);
+    document.getElementById("copyDetails").addEventListener("click", copyHeaderToClipboard);
+
+    document.getElementById("formatSelect").addEventListener("change",(e)=>{
+      applyCode(localStorage.getItem(STORAGE_KEY) || getPersistentCode());
+    });
+
+    document.getElementById("applyFilter").addEventListener("click", ()=>{
+      const v = document.getElementById("filterInput").value.trim();
+      if(!v){ renderTable(currentEntries); return; }
+      let re = null;
+      try{ re = new RegExp(v,"i"); }catch(e){ alert("Invalid regex"); renderTable(currentEntries); return; }
+      renderTable(currentEntries, re);
+    });
+
+    document.getElementById("clearFilter").addEventListener("click", ()=>{
+      document.getElementById("filterInput").value = "";
+      renderTable(currentEntries);
+    });
+
+    document.getElementById("filterInput").addEventListener("keydown",(e)=>{
+      if(e.key === "Enter"){ document.getElementById("applyFilter").click(); }
+    });
+
+    // reset confirmation double-click to avoid accidental reset
+    let resetBtn = document.getElementById("resetBtn");
+    resetBtn.addEventListener("click", ()=>{ resetCode(); });
+
+    // Copy filename when clicking preview
+    document.getElementById("filenamePreview").addEventListener("click", ()=>{
+      const txt = document.getElementById("filenamePreview").textContent;
+      navigator.clipboard?.writeText(txt).then(()=>{ alert("Filename copied to clipboard: " + txt); }, ()=>{ prompt("Filename:", txt); });
+    });
+  })();
+
+</script>
+</body>
+</html>
