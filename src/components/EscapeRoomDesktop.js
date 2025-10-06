@@ -242,38 +242,38 @@ function MailApp() {
   const emails = [
     {
       id: 1,
-      subject: "Yield Variance Report",
-      from: "yield-ops@company.com",
-      to: "marcus.reed@company.com",
+      subject: "Data Transfer Alert",
+      from: "infosec-alerts@company.com",
+      to: "c.mendez@company.com",
       path: `${process.env.PUBLIC_URL}/sim/files/yield_variance.html`,
     },
     {
       id: 2,
-      subject: "Tooling Maintenance Schedule",
-      from: "maintenance@company.com",
-      to: "employee@company.com",
+      subject: "System Management",
+      from: "system-admin@company.com",
+      to: "c.mendez@company.com",
       path: `${process.env.PUBLIC_URL}/sim/files/tooling_maintanence.html`,
     },
     {
       id: 3,
       subject: "Security Concern",
       from: "alerts@corp.com",
-      to: "employee@company.com",
+      to: "c.mendez@company.com",
       path: `${process.env.PUBLIC_URL}/sim/files/suspicious-email.html`,
     },
     {
       id: 4,
       subject: "Dispose Immediately",
       from: "sus@corp.com",
-      to: "employee@company.com",
+      to: "c.mendez@company.com",
       path: `${process.env.PUBLIC_URL}/sim/files/suspicious-email2.html`,
     },
     {
       id: 5,
-      subject: "Concerning Behavior",
-      from: "greg.jones@company.com",
-      to: "marcus.reed@company.com",
-      path: `${process.env.PUBLIC_URL}/sim/files/supervisor_concern.html`,
+      subject: "Jira Ticket - 12345",
+      from: "a.martin@company.com",
+      to: "c.mendez@company.com",
+      path: `${process.env.PUBLIC_URL}/sim/files/jira.html`,
     },
   ];
   const [selected, setSelected] = useState(emails[0]);
@@ -329,9 +329,9 @@ function BrowserApp() {
       path: `${process.env.PUBLIC_URL}/sim/files/cyber-article.html`,
     },
     {
-      id: "Vendor",
-      title: "CoreFab Vendor Portal",
-      path: `${process.env.PUBLIC_URL}/sim/files/vendor_portal.html`,
+      id: "Troubleshooting",
+      title: "Troubleshooting Basic IT",
+      path: `${process.env.PUBLIC_URL}/sim/files/troubleshooting_web.html`,
     },
     {
       id: "Silly",
