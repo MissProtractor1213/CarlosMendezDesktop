@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Troubleshooting Guides — Quick Command Prompts</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#0b66ff; --muted:#6b7280; --paper:#ffffff; --bg:#f5f7fb;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:#0f1724}
+  .wrap{max-width:1100px;margin:24px auto;padding:18px;}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#0b84ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+  h1{font-size:20px;margin:0}
+  .meta{color:var(--muted);font-size:13px}
+  .controls{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+  .btn-primary{background:var(--accent);color:white;box-shadow:0 8px 20px rgba(11,102,255,0.12)}
+  .btn-ghost{background:transparent;border:1px solid #e6ecff;color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1fr 380px;gap:18px;margin-top:16px}
+  .card{background:var(--paper);padding:14px;border-radius:10px;box-shadow:0 8px 30px rgba(10,20,40,0.05)}
+  .side{background:linear-gradient(180deg,#fff,#fbfdff);padding:12px;border-radius:10px}
+  .section{margin-bottom:14px}
+  h2{font-size:16px;margin:0 0 8px 0}
+  p{margin:6px 0;color:#16324a}
+  pre{background:#0f1724;color:#dbeafe;padding:10px;border-radius:8px;overflow:auto;font-size:13px}
+  code{font-family:monospace;background:#f3f6fb;padding:3px 6px;border-radius:4px}
+  .cmd-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .cmd{flex:1;background:#0f1724;color:#dbeafe;padding:8px;border-radius:8px;font-family:monospace;font-size:13px;white-space:pre-wrap}
+  .copy{padding:8px 10px;border-radius:8px;border:0;background:#0b66ff;color:#fff;cursor:pointer;font-weight:700}
+  .note{font-size:13px;color:var(--muted)}
+  .muted{color:var(--muted);font-size:13px}
+  .category{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .chip{background:#f1f6ff;color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:600;font-size:13px;border:1px solid #e6f0ff}
+  .kbd{background:#fff;border:1px solid #e5e7eb;padding:3px 6px;border-radius:6px;font-family:monospace}
+  /* print */
+  @media print{
+    body{background:white}
+    .wrap{box-shadow:none;margin:0;padding:0}
+    .controls, .side, .chip{display:none}
+    .card{box-shadow:none;border-radius:0;padding:12mm}
+    pre{background:#111;color:#dbeafe}
+  }
+  @media (max-width:980px){
+    .grid{grid-template-columns:1fr}
+    .side{order:2}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-hidden="true">TG</div>
+      <div>
+        <h1>Troubleshooting Guides — Quick Command Prompts</h1>
+        <div class="meta">Short, copyable commands for Windows, Linux, macOS — ready for print · Oct 5, 2025</div>
+      </div>
+    </header>
+
+    <div class="controls" aria-hidden="true">
+      <button class="btn btn-primary" onclick="window.print()">Save as PDF / Print</button>
+      <button class="btn btn-ghost" id="copyAll">Copy condensed cheat-sheet</button>
+      <div class="muted" style="align-self:center">Tip: click any <code>Copy</code> button to copy that command</div>
+    </div>
+
+    <div class="grid" role="main">
+      <div>
+
+        <!-- Password & Account -->
+        <div class="card section" id="password">
+          <h2>Password & Account</h2>
+          <p class="note">Verify identity; do not ask users to reveal passwords. Use these commands to check account status, reset or unlock.</p>
+
+          <div class="category">
+            <div class="chip">Windows</div><div class="chip">PowerShell</div>
+          </div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_pw_win_1">
+# Check AD account status (AD module)
+Get-ADUser -Identity "jsmith" -Properties LockedOut,PasswordExpired,Enabled
+            </div>
+            <button class="copy" data-target="cmd_pw_win_1">Copy</button>
+          </div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_pw_win_2">
+# Unlock account and reset password
+Unlock-ADAccount -Identity "jsmith"; Set-ADAccountPassword -Identity "jsmith" -Reset -NewPassword (ConvertTo-SecureString "TempP@ssw0rd!" -AsPlainText -Force)
+            </div>
+            <button class="copy" data-target="cmd_pw_win_2">Copy</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="category">
+            <div class="chip">Linux</div><div class="chip">CLI</div>
+          </div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_pw_lin_1">
+# Change local password (as admin)
+sudo passwd jsmith
+            </div>
+            <button class="copy" data-target="cmd_pw_lin_1">Copy</button>
+          </div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_pw_lin_2">
+# View failed auth attempts (systemd/journal)
+sudo journalctl -u sshd --since "1 hour ago" | tail -n 50
+            </div>
+            <button class="copy" data-target="cmd_pw_lin_2">Copy</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="category"><div class="chip">macOS</div></div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_pw_mac_1">
+# Reset local account password (macOS)
+sudo dscl . -passwd /Users/jsmith "NewTempPass123!"
+            </div>
+            <button class="copy" data-target="cmd_pw_mac_1">Copy</button>
+          </div>
+        </div>
+
+        <!-- Network -->
+        <div class="card section" id="network">
+          <h2>Network & DNS</h2>
+          <p class="note">Check connectivity, DNS resolution, and network routes.</p>
+
+          <div class="category"><div class="chip">Windows</div></div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_net_win_1">
+# Basic network info & DNS cache
+ipconfig /all
+ipconfig /flushdns
+            </div>
+            <button class="copy" data-target="cmd_net_win_1">Copy</button>
+          </div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_net_win_2">
+# Test connectivity / trace
+ping -n 4 8.8.8.8
+tracert example.com
+            </div>
+            <button class="copy" data-target="cmd_net_win_2">Copy</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="category"><div class="chip">Linux / macOS</div></div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_net_unix_1">
+# IP, route, DNS lookup
+ip a && ip route
+ping -c 4 8.8.8.8
+dig +short example.com || nslookup example.com
+            </div>
+            <button class="copy" data-target="cmd_net_unix_1">Copy</button>
+          </div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_net_unix_2">
+# Trace route
+traceroute example.com   # macOS/Linux (use 'tracepath' on some distros)
+            </div>
+            <button class="copy" data-target="cmd_net_unix_2">Copy</button>
+          </div>
+        </div>
+
+        <!-- Services & Processes -->
+        <div class="card section" id="service">
+          <h2>Service / Process</h2>
+          <p class="note">Restart, check status, or view logs for services.</p>
+
+          <div class="category"><div class="chip">Linux (systemd)</div></div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_srv_lin_1">
+# Check service status, restart, view logs
+sudo systemctl status nginx
+sudo systemctl restart nginx
+sudo journalctl -u nginx -n 200 --no-pager
+            </div>
+            <button class="copy" data-target="cmd_srv_lin_1">Copy</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="category"><div class="chip">Windows</div></div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_srv_win_1">
+# Services via PowerShell
+Get-Service -Name wuauserv
+Restart-Service -Name "wuauserv" -Force
+Get-EventLog -LogName System -Newest 200 | Where-Object {$_.Source -like "*Service*"}
+            </div>
+            <button class="copy" data-target="cmd_srv_win_1">Copy</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="category"><div class="chip">macOS</div></div>
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_srv_mac_1">
+# macOS launchctl / process
+sudo launchctl list | grep myservice
+sudo launchctl kickstart -k system/com.example.service
+ps aux | grep -i myservice
+            </div>
+            <button class="copy" data-target="cmd_srv_mac_1">Copy</button>
+          </div>
+        </div>
+
+        <!-- Disk & Storage -->
+        <div class="card section" id="disk">
+          <h2>Disk & Storage</h2>
+          <p class="note">Check disk space, inodes, and basic file system health.</p>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_disk_unix_1">
+# Disk usage, inodes, top directories
+df -hT
+df -i
+du -sh /var/* | sort -hr | head -n 20
+            </div>
+            <button class="copy" data-target="cmd_disk_unix_1">Copy</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_disk_win_1">
+# Windows disk space & chkdsk
+wmic logicaldisk get size,freespace,caption
+chkdsk C: /f
+            </div>
+            <button class="copy" data-target="cmd_disk_win_1">Copy</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_disk_mac_1">
+# macOS disk usage & repair
+diskutil list
+diskutil verifyVolume /Volumes/YourVolume
+            </div>
+            <button class="copy" data-target="cmd_disk_mac_1">Copy</button>
+          </div>
+        </div>
+
+        <!-- Logs & Diagnostics -->
+        <div class="card section" id="logs">
+          <h2>Logs & Diagnostics</h2>
+          <p class="note">Collect and tail logs to find recent errors.</p>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_logs_lin_1">
+# Tail log files
+sudo tail -n 200 /var/log/syslog
+sudo tail -F /var/log/nginx/error.log
+            </div>
+            <button class="copy" data-target="cmd_logs_lin_1">Copy</button>
+          </div>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_logs_win_1">
+# Windows Event logs (PowerShell)
+Get-EventLog -LogName Application -EntryType Error -Newest 100
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=2} -MaxEvents 200
+            </div>
+            <button class="copy" data-target="cmd_logs_win_1">Copy</button>
+          </div>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_logs_mac_1">
+# macOS logs
+log show --predicate 'eventMessage CONTAINS "error"' --last 1h
+            </div>
+            <button class="copy" data-target="cmd_logs_mac_1">Copy</button>
+          </div>
+        </div>
+
+        <!-- Authentication & SSO -->
+        <div class="card section" id="auth">
+          <h2>Authentication / SSO</h2>
+          <p class="note">Check identity provider status, token caches, and common SSO issues.</p>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_azure_1">
+# Azure AD (MSOnline/AzureAD modules) — example: reset password (requires module + permissions)
+Set-MsolUserPassword -UserPrincipalName user@contoso.com -NewPassword "TempP@ssw0rd!" -ForceChangePassword $true
+            </div>
+            <button class="copy" data-target="cmd_azure_1">Copy</button>
+          </div>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_adfs_1">
+# Check ADFS service on Windows Server
+Get-Service adfssrv
+Get-EventLog -LogName AD FS/Admin -Newest 100
+            </div>
+            <button class="copy" data-target="cmd_adfs_1">Copy</button>
+          </div>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_idp_http_1">
+# Check IDP health (example HTTP check)
+curl -I https://idp.example.com/.well-known/openid-configuration
+            </div>
+            <button class="copy" data-target="cmd_idp_http_1">Copy</button>
+          </div>
+        </div>
+
+        <!-- MFA -->
+        <div class="card section" id="mfa">
+          <h2>MFA (Authenticator & Push)</h2>
+          <p class="note">Common fixes: clock skew, re-enroll authenticator, use backup codes.</p>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_mfa_1">
+# Azure AD: revoke refresh tokens for a user (forces reauth)
+Revoke-AzureADUserAllRefreshToken -ObjectId <user-object-id>
+            </div>
+            <button class="copy" data-target="cmd_mfa_1">Copy</button>
+          </div>
+
+          <div class="cmd-row">
+            <div class="cmd" id="cmd_mfa_2">
+# TOTP clock skew: instruct user to re-sync app (Google Authenticator on Android)
+# Alternatively, re-provision by removing & re-adding the account.
+            </div>
+            <button class="copy" data-target="cmd_mfa_2">Copy</button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <aside class="side">
+        <div class="muted" style="margin-bottom:8px">Quick cheats & reminders</div>
+
+        <div style="margin-bottom:10px">
+          <strong>Safe verification</strong>
+          <p class="note">Ask for verification items (last 4 of phone, employee ID, home office) — never request the password itself.</p>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <strong>Common troubleshooting flow</strong>
+          <ol class="muted">
+            <li>Verify identity</li>
+            <li>Confirm exact error + screenshot</li>
+            <li>Try simple fixes (caps lock, different device)</li>
+            <li>Check logs & account status</li>
+            <li>Reset / escalate if compromise suspected</li>
+          </ol>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <strong>Keyboard shortcuts</strong>
+          <p class="muted"><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">Esc</span> — open Task Manager (Windows)</p>
+          <p class="muted"><span class="kbd">Cmd</span>+<span class="kbd">Space</span> — Spotlight (macOS)</p>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <strong>Contact / escalation template</strong>
+          <pre style="background:#f6f9ff;border-radius:6px;padding:8px;font-size:13px">Subject: Escalation — [Service] issue affecting [# users]
+Summary: One-line summary
+Time first observed: [timestamp]
+Steps tried: 1) 2) 3)
+Attached: screenshots / logs
+Request: Assistance with [IDP/Network/Storage] — contact: helpdesk@org.example</pre>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <strong>Exportable quick-sheet</strong>
+          <p class="muted">Click <strong>Copy condensed cheat-sheet</strong> to copy a pared-down list of the most common commands to paste into ticket notes or Slack.</p>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+<script>
+  // Copy button logic
+  document.querySelectorAll('.copy').forEach(btn=>{
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-target');
+      const el = document.getElementById(id);
+      const text = el ? el.textContent.trim() : '';
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = 'Copied';
+        setTimeout(()=> btn.textContent = 'Copy', 1200);
+      } catch (e) {
+        prompt('Copy the command manually:', text);
+      }
+    });
+  });
+
+  // condensed cheat-sheet (most common commands)
+  const condensed = [
+    "# Condensed Troubleshooting Cheat-sheet",
+    "## Network",
+    "ping -c 4 8.8.8.8",
+    "dig +short example.com",
+    "## Services",
+    "sudo systemctl status <service>",
+    "sudo systemctl restart <service>",
+    "## Disk",
+    "df -hT",
+    "du -sh /var/* | sort -hr | head -n 20",
+    "## Logs",
+    "sudo journalctl -u <service> -n 200 --no-pager",
+    "Get-EventLog -LogName System -Newest 200   # Windows",
+    "## Accounts / Passwords",
+    "Unlock-ADAccount -Identity \"jsmith\"   # PowerShell",
+    "sudo passwd jsmith   # Linux",
+    "## MFA / SSO",
+    "curl -I https://idp.example.com/.well-known/openid-configuration",
+    ""
+  ].join("\\n");
+
+  document.getElementById('copyAll').addEventListener('click', async ()=>{
+    try {
+      await navigator.clipboard.writeText(condensed);
+      alert('Condensed cheat-sheet copied to clipboard.');
+    } catch(e) {
+      prompt('Condensed cheat-sheet (copy):', condensed);
+    }
+  });
+
+  // make code blocks selectable on click
+  document.querySelectorAll('.cmd').forEach(el=>{
+    el.addEventListener('click', ()=> {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+  });
+</script>
+</body>
+</html>
