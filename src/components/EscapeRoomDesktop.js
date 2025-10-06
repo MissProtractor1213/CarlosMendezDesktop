@@ -29,7 +29,7 @@ import useFullscreen from "../hooks/useFullscreen";
  * public/sim/files/company-policy.pdf
  */
 
-const WALLPAPER = "bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-600";
+const WALLPAPER = "bg-gradient-to-r from-cyan-500 to-indigo-800";
 
 /* Simple Windows logo */
 function WindowsLogo({ className = "w-7 h-7" }) {
@@ -120,28 +120,27 @@ function FileExplorer() {
         path: `${process.env.PUBLIC_URL}/sim/files/wafer-recipe.html`,
       },
       {
-        name: "itinerary.doc",
+        name: "bench_backup",
         type: "html",
         suspicious: false,
         size: "4.7 KB",
         modified: "Today 9:22 AM",
-        path: `${process.env.PUBLIC_URL}/sim/files/itinerary.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/bench_backup.html`,
       },
       {
-        name: "invoice.doc",
+        name: "lab_results",
         type: "html",
         size: "3.0 KB",
         modified: "Today 1:04 PM",
-        path: `${process.env.PUBLIC_URL}/sim/files/invoice.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/lab_results.html`,
       },
-      {
-        name: "log_files.txt",
-        type: "html",0
+       {
+        name: "analysis_tmp",
+        type: "html",
         size: "3.0 KB",
-        modified: "Today 1:00 AM",
-        path: `${process.env.PUBLIC_URL}/sim/files/log-files.html`,
+        modified: "Today 1:04 PM",
+        path: `${process.env.PUBLIC_URL}/sim/files/analysis_tmp.html`,
       },
-  
     ],
     []
   );
@@ -242,17 +241,17 @@ function MailApp() {
   const emails = [
     {
       id: 1,
-      subject: "Invoice Reminder",
-      from: "billing@vendor.com",
-      to: "employee@company.com",
-      path: `${process.env.PUBLIC_URL}/sim/files/invoice.html`,
+      subject: "Yield Variance Report",
+      from: "yield-ops@company.com",
+      to: "marcus.reed@company.com",
+      path: `${process.env.PUBLIC_URL}/sim/files/yield_variance.html`,
     },
     {
       id: 2,
-      subject: "Travel Itinerary",
-      from: "noreply@airline.com",
+      subject: "Tooling Maintenance Schedule",
+      from: "maintenance@company.com",
       to: "employee@company.com",
-      path: `${process.env.PUBLIC_URL}/sim/files/itinerary.html`,
+      path: `${process.env.PUBLIC_URL}/sim/files/tooling_maintanence.html`,
     },
     {
       id: 3,
@@ -270,10 +269,10 @@ function MailApp() {
     },
     {
       id: 5,
-      subject: "[Ext] RE: Monthly Data Transfer",
-      from: "employee@company.com",
-      to: "ared@northbridge.example",
-      path: `${process.env.PUBLIC_URL}/sim/files/email-data-transfer.html`,
+      subject: "Concerning Behavior",
+      from: "greg.jones@company.com",
+      to: "marcus.reed@company.com",
+      path: `${process.env.PUBLIC_URL}/sim/files/supervisor_concern.html`,
     },
   ];
   const [selected, setSelected] = useState(emails[0]);
@@ -291,9 +290,9 @@ function MailApp() {
             }`}
           >
             {/* 🔴 Only "Security Concern" is red */}
-            <div
+           <div
               className={
-                e.subject === "Security Concern"
+                ["Security Concern", "Dispose Immediately"].includes(e.subject)
                   ? "font-semibold text-red-600 text-lg"
                   : "font-semibold text-gray-900 text-lg"
               }
@@ -329,9 +328,9 @@ function BrowserApp() {
       path: `${process.env.PUBLIC_URL}/sim/files/cyber-article.html`,
     },
     {
-      id: "China",
-      title: "Tickets to Shanghai",
-      path: `${process.env.PUBLIC_URL}/sim/files/shanghai.html`,
+      id: "Vendor",
+      title: "CoreFab Vendor Portal",
+      path: `${process.env.PUBLIC_URL}/sim/files/vendor_portal.html`,
     },
     {
       id: "Silly",
@@ -398,7 +397,7 @@ export default function EscapeRoomDesktop() {
   const [hasUnlocked, setHasUnlocked] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // reveal/hide toggle
-  const correctPassword = "Noodles2016"; // change to your puzzle password
+  const correctPassword = "Echo2009"; // change to your puzzle password
 
   // Live clock
   const [now, setNow] = useState(() => new Date());
@@ -451,7 +450,7 @@ export default function EscapeRoomDesktop() {
                   e.currentTarget.style.display = "none";
                 }}
               />
-              <div className="text-xl font-bold text-gray-800 mt-2">User</div>
+              <div className="text-3xl font-bold text-gray-800 mt-2">Marcus Reed</div>
               <div className="text-base text-gray-600">Sign in</div>
             </div>
 
