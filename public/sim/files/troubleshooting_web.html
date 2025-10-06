@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT Troubleshooting & Commands</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0e1730; --text:#e5e7eb; --muted:#9ca3af; --border:#1e293b;
+    --accent:#3b82f6; --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(120deg,#0b1220 0%,#0e1730 70%,#0b1220 100%);color:var(--text);
+       font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .container{max-width:1160px;margin:28px auto;padding:0 16px}
+  .header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+  h1{margin:0;font-size:22px}
+  .search{flex:1;display:flex;align-items:center;gap:8px;background:#0a1530;border:1px solid var(--border);
+          padding:8px 12px;border-radius:10px;min-width:260px}
+  .search input{background:transparent;border:0;outline:0;color:var(--text);width:100%}
+  .tags{display:flex;flex-wrap:wrap;gap:8px}
+  .tag{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #224170;background:#0a2142;color:#cfe4ff;cursor:pointer}
+  .grid{display:grid;gap:14px}
+  @media (min-width:860px){.grid{grid-template-columns: 280px 1fr}}
+
+  .sidebar{position:sticky;top:12px;height:fit-content;background:#0b162e;border:1px solid var(--border);border-radius:12px;padding:12px}
+  .sidebar h3{margin:4px 8px 10px;font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  .nav{display:flex;flex-direction:column;gap:6px}
+  .nav a{color:var(--text);text-decoration:none;padding:8px 10px;border-radius:8px}
+  .nav a:hover,.nav a.active{background:#0f2140}
+
+  .content{display:flex;flex-direction:column;gap:16px}
+  section.section{background:#0b162e;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .section header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(180deg,#0e1d3a,#0a1528);border-bottom:1px solid var(--border)}
+  .section h2{margin:0;font-size:18px}
+  .pill{font-size:12px;padding:4px 9px;border-radius:999px;border:1px solid #24436f;background:#0a2142;color:#cfe4ff}
+
+  .cards{display:grid;gap:10px;padding:12px}
+  @media(min-width:760px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(min-width:1040px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+  .card{background:#0c1831;border:1px solid #1a2f52;border-radius:10px;padding:10px;position:relative}
+  .card h4{margin:0 0 6px;font-size:14px;color:#cfe4ff;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .desc{color:var(--muted);font-size:13px;margin-top:4px}
+  kbd{background:#0b223f;border:1px solid #23476f;border-bottom-color:#183a60;border-radius:6px;padding:3px 6px;font-size:12px;color:#e7f1ff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+  pre{margin:8px 0 0;background:#08162b;border:1px solid #183055;border-radius:8px;padding:10px;overflow:auto;font-size:13px}
+  .copy{position:absolute;top:8px;right:8px;background:#0b2a55;color:#cfe4ff;border:1px solid #1e4473;border-radius:8px;font-size:12px;padding:5px 8px;cursor:pointer}
+  .copy.copied{background:#0d3f26;border-color:#1f6b46;color:#d0ffe7}
+
+  details{border:1px dashed #24436f;border-radius:10px;padding:8px;margin-top:8px;background:#0a1b35}
+  summary{cursor:pointer;color:#dbeafe}
+  .status{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+  .status.ok{color:#a7f3d0}.status.warn{color:#fde68a}.status.bad{color:#fecaca}
+
+  .foot{color:#8da7d9;text-align:center;margin-top:16px;font-size:12px}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>IT Troubleshooting & Commands</h1>
+      <div class="search">🔎 <input id="filter" placeholder="Search anything — e.g., 'dns', 'wifi', 'splunk', 'git', 'printer', 'proxy'…" /></div>
+      <div class="tags">
+        <span class="tag" data-q="network">Network</span>
+        <span class="tag" data-q="windows">Windows</span>
+        <span class="tag" data-q="mac">macOS</span>
+        <span class="tag" data-q="linux bash">Linux</span>
+        <span class="tag" data-q="powershell">PowerShell</span>
+        <span class="tag" data-q="vpn">VPN</span>
+        <span class="tag" data-q="splunk">Splunk</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <h3>Sections</h3>
+        <nav class="nav" id="nav">
+          <a href="#quick">Quick Checks</a>
+          <a href="#network">Network & DNS</a>
+          <a href="#wifi-vpn">Wi‑Fi & VPN</a>
+          <a href="#browser">Browser/Cache</a>
+          <a href="#os-windows">Windows</a>
+          <a href="#os-mac">macOS</a>
+          <a href="#terminal">Terminal & PowerShell</a>
+          <a href="#git">Git</a>
+          <a href="#disks">Disks & Space</a>
+          <a href="#printing">Printing</a>
+          <a href="#email">Email Client</a>
+          <a href="#logs">Logs</a>
+          <a href="#security">Security</a>
+          <a href="#splunk">Splunk Admin</a>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <main class="content">
+        <!-- Quick -->
+        <section class="section" id="quick">
+          <header><h2>Quick Checks</h2><span class="pill">Start here</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="basic restart reboot cache">
+              <h4>First Aid</h4>
+              <ul class="desc">
+                <li>Reboot device and networking gear (modem/router).</li>
+                <li>Check physical connections / airplane mode.</li>
+                <li>Try another account/device to isolate scope.</li>
+                <li>Test on a different network (hotspot).</li>
+                <li>Note exact error text and timestamp.</li>
+              </ul>
+            </div>
+            <div class="card item" data-tags="status outage monitor">
+              <h4>Service Status</h4>
+              <div class="desc">Check SaaS status pages and internal outage channels. Capture screenshots for ticketing.</div>
+              <details><summary>What to collect</summary>
+                <ul class="desc">
+                  <li>URL / system, time window, impact (users/teams), repro steps.</li>
+                  <li>Client versions (browser, OS, app build).</li>
+                  <li>Recent changes (updates, new software, policy).</li>
+                </ul>
+              </details>
+            </div>
+            <div class="card item" data-tags="latency packet loss ping traceroute">
+              <h4>Connectivity Triage</h4>
+              <div class="status ok">✅ LAN ok?</div>
+              <div class="status warn">🟡 WAN slow?</div>
+              <div class="status bad">🔴 DNS failing?</div>
+              <pre>ping -c 4 8.8.8.8   # macOS/Linux
+ping -n 4 8.8.8.8  # Windows
+tracert 8.8.8.8    # Windows
+traceroute 8.8.8.8 # macOS/Linux</pre>
+              <div class="desc">Test local vs. internet reachability and path.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Network & DNS -->
+        <section class="section" id="network">
+          <header><h2>Network & DNS</h2><span class="pill">TCP/IP</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="ip address config windows">
+              <h4>Show IP (Windows)</h4>
+              <button class="copy">Copy</button>
+              <pre>ipconfig /all</pre>
+              <div class="desc">Adapter, DHCP, DNS, gateways.</div>
+            </div>
+            <div class="card item" data-tags="ip address config mac linux ifconfig">
+              <h4>Show IP (macOS/Linux)</h4>
+              <button class="copy">Copy</button>
+              <pre>ip a   # or: ifconfig</pre>
+              <div class="desc">Interfaces and addresses.</div>
+            </div>
+            <div class="card item" data-tags="dns flush windows">
+              <h4>Flush DNS (Windows)</h4>
+              <button class="copy">Copy</button>
+              <pre>ipconfig /flushdns</pre>
+            </div>
+            <div class="card item" data-tags="dns flush mac">
+              <h4>Flush DNS (macOS)</h4>
+              <button class="copy">Copy</button>
+              <pre>sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder</pre>
+            </div>
+            <div class="card item" data-tags="nslookup dig query">
+              <h4>DNS Lookup</h4>
+              <button class="copy">Copy</button>
+              <pre>nslookup example.com
+dig example.com any +trace</pre>
+            </div>
+            <div class="card item" data-tags="route gateway default">
+              <h4>Default Route</h4>
+              <button class="copy">Copy</button>
+              <pre>route print         # Windows
+ip route show       # macOS/Linux</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Wi-Fi & VPN -->
+        <section class="section" id="wifi-vpn">
+          <header><h2>Wi‑Fi & VPN</h2><span class="pill">Access</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="wifi signal windows netsh profile">
+              <h4>Wi‑Fi Details (Windows)</h4>
+              <button class="copy">Copy</button>
+              <pre>netsh wlan show interfaces
+netsh wlan show profile name="SSID" key=clear</pre>
+              <div class="desc">Signal, band, profile, auth.</div>
+            </div>
+            <div class="card item" data-tags="wifi mac airport scan">
+              <h4>Wi‑Fi Scan (macOS)</h4>
+              <button class="copy">Copy</button>
+              <pre>/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -s</pre>
+            </div>
+            <div class="card item" data-tags="vpn logs connection split tunnel">
+              <h4>VPN Basics</h4>
+              <details><summary>Checklist</summary>
+                <ul class="desc">
+                  <li>Correct group/profile? Split vs full-tunnel.</li>
+                  <li>Clock/time sync; MFA prompts completing?</li>
+                  <li>Client version matches gateway policy.</li>
+                  <li>Conflicting adapters (Hyper-V, old VPNs) disabled.</li>
+                </ul>
+              </details>
+              <div class="desc">Collect client logs & gateway error codes.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Browser -->
+        <section class="section" id="browser">
+          <header><h2>Browser / Cache</h2><span class="pill">Chrome · Edge · Firefox</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="cache clear hard reload">
+              <h4>Hard Reload</h4>
+              <div class="desc"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> · <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd></div>
+            </div>
+            <div class="card item" data-tags="cookies site data clear">
+              <h4>Clear site data (one site)</h4>
+              <button class="copy">Copy</button>
+              <pre>chrome://settings/siteData</pre>
+              <div class="desc">Search the site and remove cookies/storage.</div>
+            </div>
+            <div class="card item" data-tags="devtools console network">
+              <h4>Open DevTools</h4>
+              <div class="desc"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> · <kbd>⌘</kbd> + <kbd>Option</kbd> + <kbd>I</kbd></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Windows -->
+        <section class="section" id="os-windows">
+          <header><h2>Windows</h2><span class="pill">10 / 11</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="winsock reset repair">
+              <h4>Reset Winsock/TCP</h4>
+              <button class="copy">Copy</button>
+              <pre>netsh winsock reset
+netsh int ip reset</pre>
+            </div>
+            <div class="card item" data-tags="services restart explorer">
+              <h4>Restart Explorer</h4>
+              <button class="copy">Copy</button>
+              <pre>taskkill /f /im explorer.exe & start explorer.exe</pre>
+            </div>
+            <div class="card item" data-tags="system file checker">
+              <h4>Repair System Files</h4>
+              <button class="copy">Copy</button>
+              <pre>sfc /scannow
+DISM /Online /Cleanup-Image /RestoreHealth</pre>
+            </div>
+            <div class="card item" data-tags="proxy windows netsh winhttp">
+              <h4>Check WinHTTP Proxy</h4>
+              <button class="copy">Copy</button>
+              <pre>netsh winhttp show proxy</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- macOS -->
+        <section class="section" id="os-mac">
+          <header><h2>macOS</h2><span class="pill">Monterey+</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="dns renew dhcp">
+              <h4>Renew DHCP & DNS</h4>
+              <button class="copy">Copy</button>
+              <pre>sudo ifconfig en0 down; sudo ifconfig en0 up
+sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder</pre>
+            </div>
+            <div class="card item" data-tags="gatekeeper quarantine xattr">
+              <h4>Allow quarantined app</h4>
+              <button class="copy">Copy</button>
+              <pre>xattr -d com.apple.quarantine /path/to/App.app</pre>
+            </div>
+            <div class="card item" data-tags="profiles mdm list">
+              <h4>List configuration profiles</h4>
+              <button class="copy">Copy</button>
+              <pre>profiles status -type enrollment
+profiles list -type configuration</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Terminal / PowerShell -->
+        <section class="section" id="terminal">
+          <header><h2>Terminal & PowerShell</h2><span class="pill">CLI</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="powershell processes cpu top">
+              <h4>Top processes (CPU)</h4>
+              <button class="copy">Copy</button>
+              <pre>Get-Process | Sort-Object CPU -Descending | Select-Object -First 10</pre>
+            </div>
+            <div class="card item" data-tags="ps service services">
+              <h4>Services (stopped)</h4>
+              <button class="copy">Copy</button>
+              <pre>Get-Service | Where-Object {$_.Status -ne "Running"} | Select Name, Status</pre>
+            </div>
+            <div class="card item" data-tags="bash grep ripgrep find text search">
+              <h4>Find text in files</h4>
+              <button class="copy">Copy</button>
+              <pre>grep -Rin "needle" ./</pre>
+            </div>
+            <div class="card item" data-tags="curl test http header">
+              <h4>Quick HTTP check</h4>
+              <button class="copy">Copy</button>
+              <pre>curl -I https://example.com</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Git -->
+        <section class="section" id="git">
+          <header><h2>Git</h2><span class="pill">Version control</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="git clone init">
+              <h4>Start a repo</h4>
+              <button class="copy">Copy</button>
+              <pre>git init && git add . && git commit -m "init"</pre>
+            </div>
+            <div class="card item" data-tags="git branch switch checkout">
+              <h4>Create & switch branch</h4>
+              <button class="copy">Copy</button>
+              <pre>git switch -c feature/awesome</pre>
+            </div>
+            <div class="card item" data-tags="git undo reset soft">
+              <h4>Undo last commit (keep changes)</h4>
+              <button class="copy">Copy</button>
+              <pre>git reset --soft HEAD~1</pre>
+            </div>
+            <div class="card item" data-tags="git stash wip">
+              <h4>WIP stash</h4>
+              <button class="copy">Copy</button>
+              <pre>git stash push -m "WIP" --include-untracked</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Disks -->
+        <section class="section" id="disks">
+          <header><h2>Disks & Space</h2><span class="pill">Storage</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="windows cleanup disk space temp">
+              <h4>Windows Disk Cleanup</h4>
+              <button class="copy">Copy</button>
+              <pre>cleanmgr /sageset:1 & cleanmgr /sagerun:1</pre>
+            </div>
+            <div class="card item" data-tags="linux mac disk usage du df">
+              <h4>Top folders by size (Linux/mac)</h4>
+              <button class="copy">Copy</button>
+              <pre>du -sh * | sort -h | tail -n 20</pre>
+            </div>
+            <div class="card item" data-tags="smart health">
+              <h4>SMART health (Linux)</h4>
+              <button class="copy">Copy</button>
+              <pre>sudo smartctl -a /dev/sda</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Printing -->
+        <section class="section" id="printing">
+          <header><h2>Printing</h2><span class="pill">Printers</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="windows spooler restart">
+              <h4>Restart Print Spooler (Windows)</h4>
+              <button class="copy">Copy</button>
+              <pre>net stop spooler & net start spooler</pre>
+            </div>
+            <div class="card item" data-tags="mac reset printing system">
+              <h4>Reset Printing System (macOS)</h4>
+              <details><summary>Steps</summary>
+                <ol class="desc">
+                  <li>System Settings → Printers & Scanners</li>
+                  <li>Right‑click in printers list → <em>Reset printing system…</em></li>
+                  <li>Re‑add printer using correct driver</li>
+                </ol>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <!-- Email -->
+        <section class="section" id="email">
+          <header><h2>Email Client</h2><span class="pill">Outlook · Mail</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="outlook cache ost rebuild profile">
+              <h4>Rebuild Outlook cache/profile</h4>
+              <details><summary>Windows (OST)</summary>
+                <ul class="desc">
+                  <li>File → Account Settings → Account Settings</li>
+                  <li>Data Files → Open File Location → close Outlook → rename <code>.ost</code></li>
+                  <li>Relaunch; Outlook rebuilds cache</li>
+                </ul>
+              </details>
+              <details><summary>macOS</summary>
+                <ul class="desc">
+                  <li>Outlook → Preferences → Accounts → re-add account</li>
+                  <li>Or clear cache: right‑click folder → Properties → Empty Cache</li>
+                </ul>
+              </details>
+            </div>
+            <div class="card item" data-tags="gmail size search operators">
+              <h4>Gmail search operators</h4>
+              <pre>larger:10M older_than:1y to:me has:attachment filename:pdf</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Logs -->
+        <section class="section" id="logs">
+          <header><h2>Logs</h2><span class="pill">Where to look</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="windows event viewer">
+              <h4>Windows Event Viewer</h4>
+              <pre>eventvwr.msc</pre>
+              <div class="desc">Check <em>Application</em>, <em>System</em>, and app‑specific logs.</div>
+            </div>
+            <div class="card item" data-tags="mac console app logs">
+              <h4>macOS Console</h4>
+              <pre>open -a Console</pre>
+            </div>
+            <div class="card item" data-tags="linux journalctl systemd">
+              <h4>Linux (systemd)</h4>
+              <pre>journalctl -xe
+systemctl status servicename</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Security -->
+        <section class="section" id="security">
+          <header><h2>Security</h2><span class="pill">AV · Patching</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="windows defender quick scan">
+              <h4>Defender quick scan</h4>
+              <button class="copy">Copy</button>
+              <pre>PowerShell -Command "Start-MpScan -ScanType QuickScan"</pre>
+            </div>
+            <div class="card item" data-tags="patch updates windows">
+              <h4>Force Windows Update check</h4>
+              <button class="copy">Copy</button>
+              <pre>usoclient StartScan</pre>
+            </div>
+            <div class="card item" data-tags="mac quarantine gatekeeper spctl">
+              <h4>Gatekeeper status (macOS)</h4>
+              <button class="copy">Copy</button>
+              <pre>spctl --status</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Splunk -->
+        <section class="section" id="splunk">
+          <header><h2>Splunk Admin</h2><span class="pill">CLI & Tips</span></header>
+          <div class="cards">
+            <div class="card item" data-tags="splunk service status restart">
+              <h4>Service status</h4>
+              <button class="copy">Copy</button>
+              <pre>$SPLUNK_HOME/bin/splunk status</pre>
+            </div>
+            <div class="card item" data-tags="splunk restart safe">
+              <h4>Restart</h4>
+              <button class="copy">Copy</button>
+              <pre>$SPLUNK_HOME/bin/splunk restart</pre>
+            </div>
+            <div class="card item" data-tags="splunk btool debug inputs props transforms">
+              <h4>btool (find config source)</h4>
+              <button class="copy">Copy</button>
+              <pre>$SPLUNK_HOME/bin/splunk btool props list --debug</pre>
+            </div>
+            <div class="card item" data-tags="splunk rest search jobs">
+              <h4>Search via REST</h4>
+              <button class="copy">Copy</button>
+              <pre>curl -k -u admin:changeme https://localhost:8089/services/search/jobs -d search='search index=_internal | head 5'</pre>
+            </div>
+          </div>
+        </section>
+
+        <div class="foot">Pro tip: Use <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>F</kbd> to search. Click any “Copy” to copy commands.</div>
+      </main>
+    </div>
+  </div>
+
+<script>
+  // Filter function
+  const filter = document.getElementById('filter');
+  const items = [...document.querySelectorAll('.item')];
+  const nav = document.getElementById('nav');
+  filter.addEventListener('input', () => {
+    const q = filter.value.toLowerCase().trim();
+    items.forEach(el => {
+      const hay = (el.innerText + ' ' + (el.dataset.tags||'')).toLowerCase();
+      el.style.display = hay.includes(q) ? '' : 'none';
+    });
+  });
+  // Quick tag filters
+  document.querySelectorAll('.tag').forEach(t => {
+    t.addEventListener('click', () => {
+      filter.value = t.dataset.q;
+      filter.dispatchEvent(new Event('input'));
+    });
+  });
+  // Copy buttons
+  document.querySelectorAll('.copy').forEach(btn => {
+    const pre = btn.nextElementSibling;
+    btn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(pre.innerText);
+        btn.classList.add('copied'); btn.textContent = 'Copied';
+        setTimeout(() => { btn.classList.remove('copied'); btn.textContent='Copy'; }, 1200);
+      }catch(e){ btn.textContent='Error'; setTimeout(()=>btn.textContent='Copy',1200); }
+    });
+  });
+  // Sidebar active state
+  nav.addEventListener('click', (e) => {
+    if(e.target.tagName === 'A'){
+      [...nav.querySelectorAll('a')].forEach(a=>a.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+  });
+</script>
+</body>
+</html>
