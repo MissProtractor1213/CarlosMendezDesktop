@@ -121,12 +121,12 @@ function FileExplorer() {
         path: `${process.env.PUBLIC_URL}/sim/files/eventlog.html`,
       },
       {
-        name: "password_reset.pdf",
+        name: "logfile.txt",
         type: "html",
         suspicious: false,
         size: "4.7 KB",
         modified: "Today 9:22 AM",
-        path: `${process.env.PUBLIC_URL}/sim/files/password_guide.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/log_files.html`,
       },
       {
         name: "troubleshooting.pdf",
