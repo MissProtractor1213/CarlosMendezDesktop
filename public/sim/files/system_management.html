@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>System Management Notification</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f5f7fb;
+      padding: 30px;
+      color: #1a1a1a;
+    }
+    .email-card {
+      background: #ffffff;
+      border: 1px solid #d8dee9;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+    h2 {
+      color: #0b3d91;
+      margin-bottom: 8px;
+    }
+    .meta {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+    .highlight {
+      background: #f1f5ff;
+      border-left: 4px solid #0066ff;
+      padding: 12px;
+      margin-top: 16px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .footer {
+      border-top: 1px solid #e2e8f0;
+      margin-top: 24px;
+      padding-top: 12px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    a.button {
+      display: inline-block;
+      margin-top: 16px;
+      background: #0066ff;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-card">
+    <h2>System Management Update — Scheduled Maintenance</h2>
+    <div class="meta">
+      From: system-admin@intra.corp.local<br>
+      To: all.employees@intra.corp.local<br>
+      Date: October 6, 2025
+    </div>
+
+    <p>Hello team,</p>
+
+    <p>
+      The IT Infrastructure group will be performing scheduled maintenance on the
+      <strong>System Management Portal (SMP)</strong> to implement critical security patches and stability updates.
+    </p>
+
+    <div class="highlight">
+      <strong>Maintenance Window:</strong><br>
+      Friday, October 10, 2025 — 10:00 PM to 2:00 AM (CST)<br>
+      <strong>Systems Affected:</strong> SMP Dashboard, User Access Control, Remote Asset Management<br>
+      <strong>Expected Downtime:</strong> 3–4 hours
+    </div>
+
+    <p>
+      During this window, users will not be able to log in or perform remote configuration tasks.
+      Any automated processes scheduled during this time will be temporarily paused and resume automatically once services are restored.
+    </p>
+
+    <p>
+      Please review your active jobs and reschedule any system tasks that might conflict with the maintenance period.
+    </p>
+
+    <a href="https://intranet.corp.local/smp-status" class="button" target="_blank">View System Status</a>
+
+    <p style="margin-top: 18px;">
+      We appreciate your patience while we perform this critical maintenance to ensure improved reliability and compliance.
+    </p>
+
+    <p>Thank you,<br>
+      <strong>IT System Management Team</strong><br>
+      Infrastructure & Security Division
+    </p>
+
+    <div class="footer">
+      This is an automated message from the IT System Management Portal. Do not reply to this email.
+    </div>
+  </div>
+</body>
+</html>
