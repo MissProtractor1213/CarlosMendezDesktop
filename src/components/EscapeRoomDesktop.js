@@ -121,26 +121,26 @@ function FileExplorer() {
         path: `${process.env.PUBLIC_URL}/sim/files/eventlog.html`,
       },
       {
-        name: "bench_backup",
+        name: "password_reset.pdf",
         type: "html",
         suspicious: false,
         size: "4.7 KB",
         modified: "Today 9:22 AM",
-        path: `${process.env.PUBLIC_URL}/sim/files/bench_backup.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/password_guide.html`,
       },
       {
-        name: "lab_results",
+        name: "troubleshooting.pdf",
         type: "html",
         size: "3.0 KB",
         modified: "Today 1:04 PM",
-        path: `${process.env.PUBLIC_URL}/sim/files/lab_results.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/troubleshooting_pdf.html`,
       },
        {
-        name: "analysis_tmp",
+        name: "list.txt",
         type: "html",
         size: "3.0 KB",
         modified: "Today 1:04 PM",
-        path: `${process.env.PUBLIC_URL}/sim/files/analysis_tmp.html`,
+        path: `${process.env.PUBLIC_URL}/sim/files/password_lists.html`,
       },
     ],
     []
@@ -207,7 +207,7 @@ function FileExplorer() {
                 <div className="flex-1">
                   <div className="text-lg font-semibold">
                     {/* 🔴 Only TEAM-PHOTO.pdf is red */}
-                    <span className={f.name === "TEAM-PHOTO.pdf" ? "text-red-600" : "text-gray-900"}>
+                    <span className={f.name === "eventlog.txt" ? "text-red-600" : "text-gray-900"}>
                       {f.name}
                     </span>
                     {f.suspicious && (
